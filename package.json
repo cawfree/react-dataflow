@@ -1,0 +1,33 @@
+{
+  "name": "react-dataflow",
+  "version": "0.0.1",
+  "description": "A dataflow execution format for React.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": "https://github.com/cawfree/react-dataflow",
+  "author": "Alex Thomas (@cawfree) <hello@cawfree.com>",
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "__mocks__"
+    ]
+  },
+  "license": "MIT",
+  "private": false,
+  "devDependencies": {
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.7.4",
+    "@babel/polyfill": "^7.7.0",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-react": "^7.7.4",
+    "jest": "^24.9.0",
+    "prop-types": "^15.7.2",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0"
+  },
+  "dependencies": {
+    "immutable": "^4.0.0-rc.12",
+    "uuid": "^3.3.3"
+  }
+}
