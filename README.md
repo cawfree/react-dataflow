@@ -153,7 +153,7 @@ DigitalClock.wirePropTypes = {
 
 Using `wirePropTypes`, we've informed `react-dataflow` that our component is capable of passing a boolean `clk` signal along the wire.
 
-For our, `LED` component, we've only had to make sure that it is sensitive to data passed using wire references. This is easily achieved using a call to the `withWires` HOC:
+For our `LED` component, we've only had to make sure that it is sensitive to data passed using wire references. This is easily achieved using a call to the `withWires` HOC:
 
 ```javascript
 import React from 'react';
