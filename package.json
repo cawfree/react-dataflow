@@ -8,7 +8,9 @@
     "test": "jest"
   },
   "husky": {
-    "pre-push": "npm run build"
+    "hooks": {
+      "pre-push": "npm run build"
+    }
   },
   "repository": "https://github.com/cawfree/react-dataflow",
   "author": "Alex Thomas (@cawfree) <hello@cawfree.com>",
