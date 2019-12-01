@@ -2,7 +2,7 @@
 A dataflow execution format for [React](https://reactjs.org/).
 
 <p align="center">
-  <img src="./res/logo.png" width="275" height="240">
+  <img src="./assets/squiggly.png" width="275" height="240">
 </p>
 
 It helps you construct applications where the components are business logic themselves, and the behaviour of the application comes from the way the components have been connected, not too disimilar to a digital circuit.
