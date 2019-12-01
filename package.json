@@ -1,6 +1,6 @@
 {
   "name": "react-dataflow",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A dataflow execution format for React.",
   "main": "dist/index.js",
   "scripts": {
