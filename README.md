@@ -1,6 +1,10 @@
 # react-dataflow
 A dataflow execution format for [React](https://reactjs.org/).
 
+<p align="center">
+  <img src="./res/logo.png" width="275" height="240">
+</p>
+
 It helps you construct applications where the components are business logic themselves, and the behaviour of the application comes from the way the components have been connected, not too disimilar to a digital circuit.
 
 Instead of propagating data values directly via props, `react-dataflow` enables you to distribute data indirectly using _wires_. These permit conventional React components to share data independently of scope, and enables deeply-nested nested updates in self-managing child components to drive changes towards components anywhere in the hierarchy, without explicit handling.
@@ -21,10 +25,7 @@ Using [`yarn`]():
 yarn add react-dataflow
 ```
 
-## 📚 Table of Contents
-1. [Tutorial](### Tutorial)
-
-### ✍️ Tutorial
+## ✍️ Tutorial
 
 To use `react-dataflow`, your top-level application needs to be wrapped with the `withDataflow` HOC. This injects all of the required dependencies for dataflow-driven execution:
 
@@ -121,7 +122,7 @@ return (
 
 This is fundamentally what `react-dataflow` buys us; we're permitted to use the output of components and connect them abitrarily to the inputs of other components. In addition, React very helpfully optimizes these updates; whenever the value of `clk` oscillates, only the wired components are re-rendered; the `<App />` itself is not!
 
-#### 🔮 Smoke and Mirrors
+### 🔮 Smoke and Mirrors
 
 So, what's going on? Calling `useWire` seems to magically provide us with a wire which we can destructure to get a corresponding `clk` signal; so what changed?
 
