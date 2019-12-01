@@ -1,10 +1,14 @@
 {
   "name": "react-dataflow",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A dataflow execution format for React.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "./node_modules/.bin/babel ./index.js --out-file ./dist/index.js",
     "test": "jest"
+  },
+  "husky": {
+    "pre-push": "npm run build"
   },
   "repository": "https://github.com/cawfree/react-dataflow",
   "author": "Alex Thomas (@cawfree) <hello@cawfree.com>",
@@ -21,6 +25,7 @@
     "@babel/polyfill": "^7.7.0",
     "@babel/preset-env": "^7.7.4",
     "@babel/preset-react": "^7.7.4",
+    "husky": "^3.1.0",
     "jest": "^24.9.0",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",
