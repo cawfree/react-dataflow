@@ -5,7 +5,7 @@ A dataflow execution format for [React](https://reactjs.org/).
   <img src="./assets/squiggly.png" width="275" height="240">
 </p>
 
-It helps you construct applications where the components are business logic themselves, and the behaviour of the application comes from the way the components have been connected, not too disimilar to a digital circuit.
+It helps you build applications where components _are_ business logic, and the behaviour of the application arises from the way the components have been connected, not too disimilar to a digital circuit.
 
 Instead of propagating data values directly via props, `react-dataflow` enables you to distribute data indirectly using _wires_. These permit conventional React components to share data independently of scope, and enables deeply-nested nested updates in self-managing child components to drive changes towards components anywhere in the hierarchy, without explicit handling.
 
