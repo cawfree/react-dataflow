@@ -1,15 +1,24 @@
 {
   "name": "react-dataflow",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "A dataflow execution format for React.",
   "main": "dist/index.js",
   "scripts": {
     "build": "./node_modules/.bin/babel ./index.js --out-file ./dist/index.js",
     "test": "jest"
   },
+  "keywords": [
+    "react",
+    "react-native",
+    "dataflow",
+    "flow-based",
+    "fbp",
+    "wires",
+    "circuit"
+  ],
   "husky": {
     "hooks": {
-      "pre-push": "npm run-script build"
+      "pre-commit": "npm run-script build"
     }
   },
   "repository": "https://github.com/cawfree/react-dataflow",
@@ -27,7 +36,7 @@
     "@babel/polyfill": "^7.7.0",
     "@babel/preset-env": "^7.7.4",
     "@babel/preset-react": "^7.7.4",
-    "husky": "^3.1.0",
+    "husky": "^4.0.0-beta.5",
     "jest": "^24.9.0",
     "prop-types": "^15.7.2",
     "react": "^16.12.0",

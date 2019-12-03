@@ -1,24 +1,31 @@
-import React, { useState, useContext } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useContext, useEffect } from 'react';
 import { Map } from 'immutable';
 import uuidv4 from 'uuid/v4';
 
 const Signals = React.createContext(null);
 const SignalsMutator = React.createContext(null);
 
-const useSignals = () => useContext(Signals);
-const useSignalsMutator = () => useContext(SignalsMutator);
-
 const Dataflow = ({ children, ...extraProps }) => {
-  const [ arr, setSignals ] = useState([Map({})]);
-  const [ mutateSignals ] = useState(
-    () => (fn) => {
-      const signals = fn(arr[0]);
-      arr[0] = signals;
-      setSignals(
-        [...arr],
-      );
+  const signalsMutator = useContext(SignalsMutator);
+  useEffect(
+    () => {
+      if (signalsMutator) {
+        throw new Error(
+          'It is not possible to nest components wrapped withDataflow.',
+        );
+      }
     },
+    [],
+  );
+  const [ arr, setArr ] = useState(
+    () => [Map({})],
+  );
+  const [ mutateSignals ] = useState(
+    () => fn => setArr(
+      [
+        arr[0] = fn(arr[0]),
+      ],
+    ),
   );
   return (
     <SignalsMutator.Provider
@@ -38,85 +45,114 @@ export const withDataflow = Component => ({ ...extraProps }) => (
   />
 );
 
-export const withWires = Component => (props) => {
-  const [ signals ] = useSignals();
-  return (
-    <Component
-      {...props}
-      {...Object.entries(props)
-        .reduce(
-          (obj, [k, v]) => {
-            return {
-              ...obj,
-              [k]: signals.get(v),
-            };
-          },
-          {},
-        )}
-    />
+const useSignals = () => useContext(Signals);
+const useSignalsMutator = () => useContext(SignalsMutator);
+
+export const useWire = () => {
+  const mutateSignals = useSignalsMutator();
+  const [ wireId ] = useState(
+    () => {
+      const wireId = uuidv4();
+      mutateSignals(signals => signals.set(wireId, null));
+      return wireId;
+    },
   );
+  return wireId;
 };
 
-export const useWire = (TransferFunction) => {
-  const { wirePropTypes, wireDefaultProps } = TransferFunction;
-  if (!wirePropTypes || typeof wirePropTypes !== 'object') {
-    throw new Error(
-      'Dataflow: You have attempted to useWire on a component which has not defined a wirePropTypes object.',
-    );
-  }
-  const mutateSignals = useSignalsMutator();
-  const [ signalIds ] = useState(
-    () => {
-      const signalIds = Object.keys(wirePropTypes)
-        .reduce(
-          (obj, k) => (
-            {
-              ...obj,
-              [k]: uuidv4(),
-            }
-          ),
-          {},
-        );
-      mutateSignals(
-        signals => signals.set(
-          Object.entries(signalIds)
-            .reduce(
-              (map, [key, signalId]) => map.set(signalId, null),
-              signals,
-            ),
-        ),
-      );
-      return signalIds;
-    },
+const Exporter = ({ outputWires, children, ...extraProps }) => {
+  const mutateSignals = useSignalsMutator(); 
+  mutateSignals(
+    signals => Object.entries(extraProps)
+      .filter(([ k ]) => outputWires.hasOwnProperty(k))
+      .reduce(
+        (map, [k, v]) => map.set(outputWires[k], v),
+        signals,
+      ),
   );
-  const [ Export ] = useState(
-    () => {
-      const Export = ({ children, ...extraProps }) => {
-        mutateSignals(
-          signals => Object.entries(signalIds)
-            .reduce(
-              (map, [key, signalId]) => map.set(signalId, extraProps[key]),
-              signals,
-            ),
-        );
-        return (
-          <React.Fragment
-            children={children}
-          />
-        );
-      };
-      Export.propTypes = wirePropTypes;
-      Export.defaultProps = wireDefaultProps;
-      return Export;
-    },
-  );
-  const [ Component ] = useState(
-    () => props => (
-      <TransferFunction
-        {...props}
+  return null;
+};
+
+const WiredComponent = ({ Component, Export, outputKeys, ...extraProps }) => {
+  const signals = useSignals();
+  const [ Wired ] = useState(
+    () => ({ ...extraProps }) => (
+      <Component
+        {...extraProps}
+        {...Object.entries(extraProps)
+          .reduce(
+            (obj, [k, v]) => {
+              if (outputKeys.indexOf(k) < 0 && signals[0].has(v)) {
+                return {
+                  ...obj,
+                  [k]: signals[0].get(v),
+                };
+              }
+              return obj;
+            },
+            {},
+          )}
         Export={Export}
       />
     ),
   );
-  return [ Component, signalIds ];
+  return (
+    <Wired
+      {...extraProps}
+    />
+  );
+};
+
+export const withWires = Component => (props) => {
+  const { exportPropTypes, exportDefaultProps } = Component;
+  const [ outputKeys ] = useState(
+    () => {
+      if (exportPropTypes && typeof exportPropTypes === 'object') {
+        return Object
+          .keys(exportPropTypes);
+      }
+      return [];
+    },
+  );
+  const [ Export ] = useState(
+    () => {
+      if (outputKeys.length) {
+        const outputWires = outputKeys
+          .reduce(
+            (obj, k) => {
+              if (props[k]) {
+                return {
+                  ...obj,
+                  [k]: props[k],
+                };
+              }
+              return obj;
+            },
+            {},
+          );
+        const WiredExporter = props => (
+          <Exporter
+            {...props}
+            outputWires={outputWires}
+          />
+        );
+        WiredExporter.propTypes = exportPropTypes;
+        WiredExporter.defaultProps = exportDefaultProps;
+        return React.memo(WiredExporter);
+      }
+      return () => {
+        throw new Error(
+          `You have attempted to use an <Export /> for a component withWires which has not defined any exportPropTypes. (Expected object, encountered ${JSON.stringify(exportPropTypes)}.)`,
+        );
+      };
+    },
+  );
+  return (
+    <WiredComponent
+      {...props}
+      Component={Component}
+      Export={Export}
+      outputKeys={outputKeys}
+    />
+  );
 };
