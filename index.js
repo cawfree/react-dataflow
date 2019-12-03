@@ -15,7 +15,7 @@ const Dataflow = ({ children, ...extraProps }) => {
         );
       }
     },
-    [],
+    [signalsMutator],
   );
   const [ arr, setArr ] = useState(
     () => [Map({})],
@@ -70,7 +70,11 @@ const Exporter = ({ outputWires, children, ...extraProps }) => {
         signals,
       ),
   );
-  return null;
+  return (
+    <React.Fragment
+      children={children}
+    />
+  );
 };
 
 const WiredComponent = ({ Component, Export, outputKeys, ...extraProps }) => {
