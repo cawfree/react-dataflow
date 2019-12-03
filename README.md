@@ -5,7 +5,9 @@ A dataflow execution library for [React](https://reactjs.org/).
   <img src="./assets/squiggly.png" width="275" height="240">
 </p>
 
-It helps you build applications where your components _are_ the business logic; the behaviour of the application arises from the way the components have been connected, like a circuit. This is in stark contrast to conventional React, where well-architected applications usually emphasise a clear separation between presentation and computation elements. By contrast, `react-dataflow` is a _"data-first"_ perspective of React; where, we directly utilise the React DOM to drive efficient updates using the powerful [Top Level API](https://reactjs.org/docs/react-api.html), meanwhile the ability to render an equivalent frontend comes as a happy biproduct.
+It helps you build applications where your components _are_ the business logic; the behaviour of the application arises from the way the components have been connected, like a circuit. This is in stark contrast to conventional React, where well-architected applications usually emphasise a clear separation between presentation and computation elements.
+
+By contrast, `react-dataflow` is a _"data-first"_ perspective of React; where we directly utilise the React DOM to drive efficient updates using the powerful [Top Level API](https://reactjs.org/docs/react-api.html), meanwhile the ability to render an equivalent frontend comes as a happy biproduct.
 
 Instead of propagating data values directly via props, `react-dataflow` enables you to distribute data indirectly using _wires_. These permit conventional React components to share data independently of scope, and enables deeply-nested updates in self-managing child components to drive changes towards components anywhere in the hierarchy, without explicit handling. Thismakes `react-dataflow` more conducive to describing flow-based computation in React.
 
