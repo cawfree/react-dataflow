@@ -1,15 +1,13 @@
 # react-dataflow
-A dataflow execution format for [React](https://reactjs.org/).
+A dataflow execution library for [React](https://reactjs.org/).
 
 <p align="center">
   <img src="./assets/squiggly.png" width="275" height="240">
 </p>
 
-It helps you build applications where your components _are_ the business logic, and the behaviour of the application arises from the way the components have been connected. This is in stark contrast to conventional React, where well-architected applications usually demonstrate a clear separation between presentation and computation elements.
+It helps you build applications where your components _are_ the business logic; the behaviour of the application arises from the way the components have been connected, like a circuit. This is in stark contrast to conventional React, where well-architected applications usually emphasise a clear separation between presentation and computation elements. By contrast, `react-dataflow` is a _"data-first"_ perspective of React; where, we directly utilise the React DOM to drive efficient updates using the powerful [Top Level API](https://reactjs.org/docs/react-api.html), meanwhile the ability to render an equivalent frontend comes as a happy biproduct.
 
-Instead of propagating data values directly via props, `react-dataflow` enables you to distribute data indirectly using _wires_. These permit conventional React components to share data independently of scope, and enables deeply-nested updates in self-managing child components to drive changes towards components anywhere in the hierarchy, without explicit handling.
-
-`react-dataflow` is a _"data-first"_ perspective of React; where, we utilise the React DOM to drive efficient updates using the powerful [Top Level API](https://reactjs.org/docs/react-api.html), meanwhile the ability to render an equivalent frontend comes as a happy biproduct.
+Instead of propagating data values directly via props, `react-dataflow` enables you to distribute data indirectly using _wires_. These permit conventional React components to share data independently of scope, and enables deeply-nested updates in self-managing child components to drive changes towards components anywhere in the hierarchy, without explicit handling. Thismakes `react-dataflow` more conducive to describing flow-based computation in React.
 
 ## 🚀 Getting Started
 
@@ -27,7 +25,7 @@ yarn add react-dataflow
 
 ## ✍️ Tutorial
 
-To use `react-dataflow`, your top-level application needs to be wrapped with the `withDataflow` HOC. This injects all of the required dependencies for dataflow-driven execution:
+To use `react-dataflow`, your top-level application needs to be wrapped with the `withDataflow` HOC. This injects all of the required dependencies for dataflow-driven execution into your `<App />`:
 
 ```javascript
 import React from 'react';
@@ -43,7 +41,7 @@ export default withDataflow(App);
 
 Nothing special, right?
 
-Well, dataflow isn't very useful without having sources of data, so let's make one! A great example of a data source is a [clock signal](https://en.wikipedia.org/wiki/Clock_signal), like the ones we find in digital logic circuits. These emit a bistable signal which oscillates between a high and low voltage at a fixed interval, and are useful for enforcing synchronization between distributed tasks.
+Well, dataflow isn't very useful without having sources of data, so let's create one! A great example of a data source is a [clock signal](https://en.wikipedia.org/wiki/Clock_signal), like the ones we find in digital logic circuits. These emit a bistable signal which oscillates between a high and low voltage at a fixed interval, and are useful for enforcing synchronization between distributed tasks.
 
 First, let's see how we'd create one of these signals using conventional React:
 
@@ -64,7 +62,9 @@ const DigitalClock = React.memo(
 );
 ```
 
-Here, we use the [`useRaf`](https://github.com/streamich/react-use) hook to repeatedly request 1000 render frames for our component. On each frame, the component is re-rendered, and we continuously invert the contents of our `signalBuffer` and return them as a child. This generates the output `true`, `false`, `true`, `false` over and over again. This helps establish the "form" of data we're interested in using pure React, but let's turn our attention over to some of the restrictions.
+Here, we use the [`useRaf`](https://github.com/streamich/react-use) hook to repeatedly request smooth animated render frames for our component. On each frame, the component is re-rendered, and we continuously invert the contents of our `signalBuffer`, which is returned as a child. This generates the output `true`, `false`, `true`, `false` over and over again.
+
+This helps establish the square wave "form" of data we're interested in using pure React, but let's turn our attention over to some of the restrictions.
 
 Firstly, this is a pretty boring application! All we do is render a constantly flickering boolean string on the DOM when we render a `<DigitalClock />`. Of course, we could dress this up, but there's a much bigger problem at play; what happens when we want actually want to _use_ the output value to drive a change somewhere else in our DOM? In traditional React, we would have to nest some child components which should be sensitive to these changes, but then our `DigitalClock` starts to be responsible for a lot more; it stops _being_ just a `DigitalClock`, and more like a `DigitalClockProvider`.
 
@@ -76,6 +76,7 @@ To demonstrate these shortcomings, imagine that we wish to connect our `<Digital
 const LightEmittingDiode = ({ style, active }) => (
   <div
     style={[
+      // XXX: Leave this part to your imagination!
       style,
       {
         backgroundColor: active ? 'green' : 'grey',
@@ -96,7 +97,7 @@ const App = () => {
   const wire = useWire();
   return (
     <>
-      <Clock
+      <DigitalClock
         cout={wire}
       />
       <LightEmittingDiode
@@ -109,22 +110,9 @@ const App = () => {
 export default withDataflow(App);
 ```
 
-This approach scales arbitrarily. For example, we could use a [`<Not />`](https://en.wikipedia.org/wiki/Inverter_(logic_gate)) component to render the inverted result:
+Here, the `DigitalClock`'s `cout` prop is connected to the wire we've created by making a call to the `useWire` [hook](https://reactjs.org/docs/hooks-intro.html). Conversely, the `LightEmittingDiode`'s `active` prop has also been connected _to the same wire_. Meaning, that whenever the `DigitalClock`'s `cout` prop is changed, our `LightEmittingDiode` is automatically re-rendered using the new value that is sourced by the `wire`.
 
-```javascript
-const clk = useWire();
-const notOut = useWire();
-return (
-  <>
-    <Clock cout={clk}>
-      <Not input={clk} output={notOut} />
-      <LightEmittingDiode active={notOut} />
-    </Clock>
-  </>
-);
-```
-
-This is fundamentally what `react-dataflow` buys us; we're permitted to use the output of components and connect them abitrarily to the inputs of other components. In addition, React very helpfully optimizes these updates; whenever the value of `clk` oscillates, only the wired components are re-rendered; the `<App />` itself is not!
+An additional benefit to this is tht because a `wire` reference itself is effectively a constant, our top-level `<App />` instance is only rendered _once_, even though our `DigitalClock` and `LightEmittingDiode` are constantly re-rendering with each cycle.
 
 ### Complete Example
 
@@ -148,15 +136,32 @@ const Clock = React.memo(
   () => true,
 );
 
+Clock.exportPropTypes = {
+  cout: PropTypes.bool,
+};
+
 const Not = ({ Export, input }) => (
   <Export
     output={!input}
   />
 );
 
-const WiredClock = withWires(Clock, { cout: PropTypes.bool });
+Not.exportPropTypes = {
+  output: PropTypes.bool,
+};
 
-const WiredNot = withWires(Not, { output: PropTypes.bool });
+const LightEmittingDiode = ({ style, active }) => (
+  <div
+    style={[
+      style,
+      backgroundColor: active ? 'green' : 'grey',
+    ]}
+  />
+);
+
+const WiredClock = withWires(Clock);
+const WiredLightEmittingDiode = withWires(Clock);
+const WiredNot = withWires(Not);
 
 function App() {
   const clk = useWire();

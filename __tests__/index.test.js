@@ -84,6 +84,8 @@ it('should throw if we attempt to export from a component withWires if exportPro
   ReactDOM.render(<App />, document.createElement('div'));
 });
 
+// TODO: This *is* implemented, but I've been unable to write a test
+//       for it.
 test.todo('must not be possible to nest multiple dataflow diagrams');
-test.todo('must not be possible to instantiate an export without defining exportPropTypes');
+
 test.todo('must not be possible to have multiple drivers for a single wire');

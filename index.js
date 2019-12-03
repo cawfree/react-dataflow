@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Map } from 'immutable';
 import uuidv4 from 'uuid/v4';
 
@@ -6,6 +6,17 @@ const Signals = React.createContext(null);
 const SignalsMutator = React.createContext(null);
 
 const Dataflow = ({ children, ...extraProps }) => {
+  const signalsMutator = useContext(SignalsMutator);
+  useEffect(
+    () => {
+      if (signalsMutator) {
+        throw new Error(
+          'It is not possible to nest components wrapped withDataflow.',
+        );
+      }
+    },
+    [],
+  );
   const [ arr, setArr ] = useState(
     () => [Map({})],
   );
