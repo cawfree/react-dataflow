@@ -9,7 +9,7 @@ It helps you build applications where your components _are_ the business logic; 
 
 By contrast, `react-dataflow` is a _"data-first"_ perspective of React; where we directly utilise the React DOM to drive efficient updates using the powerful [Top Level API](https://reactjs.org/docs/react-api.html), meanwhile the ability to render an equivalent frontend comes as a happy biproduct.
 
-Instead of propagating data values directly via props, `react-dataflow` enables you to distribute data indirectly using _wires_. These permit conventional React components to share data independently of scope, and enables deeply-nested updates in self-managing child components to drive changes towards components anywhere in the hierarchy, without explicit handling. Thismakes `react-dataflow` more conducive to describing flow-based computation in React.
+Instead of propagating data values directly via props, `react-dataflow` enables you to distribute data indirectly using _wires_. These permit conventional React components to share data independently of scope, and enables deeply-nested updates in self-managing child components to drive changes towards components anywhere in the hierarchy, without explicit handling. This makes `react-dataflow` more conducive to describing flow-based computation in React.
 
 ## 🚀 Getting Started
 
