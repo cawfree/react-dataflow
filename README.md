@@ -114,7 +114,7 @@ export default withDataflow(App);
 
 Here, the `DigitalClock`'s `cout` prop is connected to the wire we've created by making a call to the `useWire` [hook](https://reactjs.org/docs/hooks-intro.html). Conversely, the `LightEmittingDiode`'s `active` prop has also been connected _to the same wire_. Meaning, that whenever the `DigitalClock`'s `cout` prop is changed, our `LightEmittingDiode` is automatically re-rendered using the new value that is sourced by the `wire`.
 
-An additional benefit to this is tht because a `wire` reference itself is effectively a constant, our top-level `<App />` instance is only rendered _once_, even though our `DigitalClock` and `LightEmittingDiode` are constantly re-rendering with each cycle.
+An additional benefit to this is that because a `wire` reference itself is effectively a constant, our top-level `<App />` instance is only rendered _once_, even though our `DigitalClock` and `LightEmittingDiode` are constantly re-rendering with each cycle.
 
 ### Complete Example
 
