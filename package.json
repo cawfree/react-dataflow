@@ -7,6 +7,15 @@
     "build": "./node_modules/.bin/babel ./index.js --out-file ./dist/index.js",
     "test": "jest"
   },
+  "keywords": [
+    "react",
+    "react-native",
+    "dataflow",
+    "flow-based",
+    "fbp",
+    "wires",
+    "circuit"
+  ],
   "husky": {
     "hooks": {
       "pre-push": "npm run-script build"

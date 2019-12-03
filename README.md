@@ -116,6 +116,10 @@ An additional benefit to this is tht because a `wire` reference itself is effect
 
 ### Complete Example
 
+In this example, we render a `DigitalClock`, an [`Inverter`](https://en.wikipedia.org/wiki/Inverter_(logic_gate))  and a `LightEmittingDiode`. Here, whenever the `clk` signal goes high, the `LightEmittingDiode` will become inactive, and vice-versa. This allows our `LightEmittingDiode` to behave like an ["active low"](https://www.quora.com/What-is-the-meaning-of-active-low-and-active-high-in-digital-circuits-and-logic-design) component.
+
+Notice that in order to render an `<Export />` component to manage the propagation of your component output props along a connected wire, you are **required** to specify an `exportPropTypes` attribute. This enables `react-dataflow` to efficiently manage, and validate, signal propagation using wires:
+
 ```javascript
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
@@ -136,17 +140,21 @@ const Clock = React.memo(
   () => true,
 );
 
+// XXX: Ensure that the Export component passed into the
+//      Clock instance is registered to carry a boolean
+//      "cout" prop along a wire.
 Clock.exportPropTypes = {
   cout: PropTypes.bool,
 };
 
-const Not = ({ Export, input }) => (
+// XXX: The inverter takes it's input signal, and flips it!
+const Inverter = ({ Export, input }) => (
   <Export
     output={!input}
   />
 );
 
-Not.exportPropTypes = {
+Inverter.exportPropTypes = {
   output: PropTypes.bool,
 };
 
@@ -160,21 +168,25 @@ const LightEmittingDiode = ({ style, active }) => (
 );
 
 const WiredClock = withWires(Clock);
-const WiredLightEmittingDiode = withWires(Clock);
-const WiredNot = withWires(Not);
+const WiredInverter = withWires(Inverter);
+const WiredLightEmittingDiode = withWires(LightEmittingDiode);
 
 function App() {
   const clk = useWire();
-  const notOut = useWire();
+  const nClk = useWire();
   return (
     <div className="App">
       <header className="App-header">
         <WiredClock
           cout={clk}
         />
-        <WiredNot
+        <WiredInverter
           input={clk}
-          output={notOut}
+          output={nClk}
+        />
+        <WiredLightEmittingDiode
+          someOtherPropThatWillBeHandledLikeUsual
+          active={nClk}
         />
       </header>
     </div>
