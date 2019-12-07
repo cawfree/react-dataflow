@@ -12,7 +12,7 @@ const Dataflow = ({ children, ...extraProps }) => {
     () => {
       if (signalsMutator) {
         throw new Error(
-          'It is not possible to nest components wrapped withDataflow.',
+          'Dataflow: It is not possible to nest components wrapped withDataflow.',
         );
       }
     },
@@ -133,10 +133,15 @@ const WiredComponent = ({ Component, Export, outputKeys, dataflowId, ...extraPro
   );
 };
 
-export const withWires = Component => (props) => {
-  // TODO: This needs to be externally defined using options. (Prevent collisions.)
+export const withWires = (Component, options = {}) => (props) => {
+  if (!options || typeof options !== 'object') {
+    throw new Error(
+      `Dataflow: When wrapping a <Component /> withWires, you must pass either a valid configuration object, or undefined. Encountered: ${options}.`,
+    );
+  }
   const [ dataflowId ] = useState(
-    () => uuidv4(),
+    // TODO: Validate that the supplied key is an appropriate unique type.
+    () => options.key || uuidv4(),
   );
   const { exportPropTypes, exportDefaultProps } = Component;
   const [ outputKeys ] = useState(
@@ -177,7 +182,7 @@ export const withWires = Component => (props) => {
       }
       return () => {
         throw new Error(
-          `You have attempted to use an <Export /> for a component withWires which has not defined any exportPropTypes. (Expected object, encountered ${JSON.stringify(exportPropTypes)}.)`,
+          `Dataflow: You have attempted to use an <Export /> for a component withWires which has not defined any exportPropTypes. (Expected object, encountered ${JSON.stringify(exportPropTypes)}.)`,
         );
       };
     },
