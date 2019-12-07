@@ -53,7 +53,17 @@ export const useWire = () => {
   const [ wireId ] = useState(
     () => {
       const wireId = uuidv4();
-      mutateSignals(signals => signals.set(wireId, null));
+      mutateSignals(
+        signals => signals
+          .set(
+            wireId,
+            Map(
+              {
+                value: null,
+              },
+            ),
+          ),
+        );
       return wireId;
     },
   );
@@ -66,7 +76,8 @@ const Exporter = ({ outputWires, children, ...extraProps }) => {
     signals => Object.entries(extraProps)
       .filter(([ k ]) => outputWires.hasOwnProperty(k))
       .reduce(
-        (map, [k, v]) => map.set(outputWires[k], v),
+        (map, [k, v]) => map
+          .setIn([outputWires[k], 'value'], v),
         signals,
       ),
   );
@@ -89,7 +100,8 @@ const WiredComponent = ({ Component, Export, outputKeys, ...extraProps }) => {
               if (outputKeys.indexOf(k) < 0 && signals[0].has(v)) {
                 return {
                   ...obj,
-                  [k]: signals[0].get(v),
+                  [k]: signals[0]
+                    .getIn([v, 'value']),
                 };
               }
               return obj;
