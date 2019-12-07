@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Map } from 'immutable';
+import { isEqual } from 'lodash';
 import uuidv4 from 'uuid/v4';
 
 const Signals = React.createContext(null);
@@ -21,11 +22,13 @@ const Dataflow = ({ children, ...extraProps }) => {
     () => [Map({})],
   );
   const [ mutateSignals ] = useState(
-    () => fn => setArr(
-      [
-        arr[0] = fn(arr[0]),
-      ],
-    ),
+    () => (fn) => {
+      const v = fn(arr[0]);
+      if (!isEqual(v, arr[0])) {
+        setArr([arr[0] = v]);
+      }
+      return v;
+    },
   );
   return (
     <SignalsMutator.Provider
@@ -60,6 +63,8 @@ export const useWire = () => {
             Map(
               {
                 value: null,
+                writers: Map({}),
+                readers: Map({}),
               },
             ),
           ),
@@ -70,14 +75,16 @@ export const useWire = () => {
   return wireId;
 };
 
-const Exporter = ({ outputWires, children, ...extraProps }) => {
+const Exporter = ({ outputWires, children, dataflowId, ...extraProps }) => {
   const mutateSignals = useSignalsMutator(); 
   mutateSignals(
-    signals => Object.entries(extraProps)
+    signals => Object
+      .entries(extraProps)
       .filter(([ k ]) => outputWires.hasOwnProperty(k))
       .reduce(
         (map, [k, v]) => map
-          .setIn([outputWires[k], 'value'], v),
+          .setIn([outputWires[k], 'value'], v)
+          .setIn([outputWires[k], 'writers', dataflowId], true),
         signals,
       ),
   );
@@ -87,6 +94,8 @@ const Exporter = ({ outputWires, children, ...extraProps }) => {
     />
   );
 };
+
+
 
 const WiredComponent = ({ Component, Export, outputKeys, ...extraProps }) => {
   const signals = useSignals();
@@ -120,6 +129,10 @@ const WiredComponent = ({ Component, Export, outputKeys, ...extraProps }) => {
 };
 
 export const withWires = Component => (props) => {
+  // TODO: This needs to be externally defined using options. (Prevent collisions.)
+  const [ dataflowId ] = useState(
+    () => uuidv4(),
+  );
   const { exportPropTypes, exportDefaultProps } = Component;
   const [ outputKeys ] = useState(
     () => {
@@ -149,6 +162,7 @@ export const withWires = Component => (props) => {
         const WiredExporter = props => (
           <Exporter
             {...props}
+            dataflowId={dataflowId}
             outputWires={outputWires}
           />
         );
