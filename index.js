@@ -95,18 +95,23 @@ const Exporter = ({ outputWires, children, dataflowId, ...extraProps }) => {
   );
 };
 
-
-
-const WiredComponent = ({ Component, Export, outputKeys, ...extraProps }) => {
+const WiredComponent = ({ Component, Export, outputKeys, dataflowId, ...extraProps }) => {
   const signals = useSignals();
+  const mutateSignals = useSignalsMutator();
   const [ Wired ] = useState(
     () => ({ ...extraProps }) => (
       <Component
         {...extraProps}
         {...Object.entries(extraProps)
+          .filter(([k]) => outputKeys.indexOf(k) < 0)
           .reduce(
             (obj, [k, v]) => {
-              if (outputKeys.indexOf(k) < 0 && signals[0].has(v)) {
+              if (signals[0].has(v)) {
+                // XXX: Mark this element as a consumer.
+                mutateSignals(
+                  signals => signals
+                    .setIn([v, 'readers', dataflowId], true),
+                );
                 return {
                   ...obj,
                   [k]: signals[0]
@@ -183,6 +188,7 @@ export const withWires = Component => (props) => {
       Component={Component}
       Export={Export}
       outputKeys={outputKeys}
+      dataflowId={dataflowId}
     />
   );
 };
