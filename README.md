@@ -142,14 +142,9 @@ const Clock = React.memo(
   () => true,
 );
 
-// XXX: Ensure that the Export component passed into the
-//      Clock instance is registered to carry a boolean
-//      "cout" prop along a wire.
 Clock.exportPropTypes = {
   cout: PropTypes.bool,
 };
-
-// XXX: The inverter takes it's input signal, and flips it!
 const Inverter = ({ Export, input }) => (
   <Export
     output={!input}
@@ -162,10 +157,11 @@ Inverter.exportPropTypes = {
 
 const LightEmittingDiode = ({ style, active }) => (
   <div
-    style={[
-      style,
+    style={{
+      width: 100,
+      height: 100,
       backgroundColor: active ? 'green' : 'grey',
-    ]}
+    }}
   />
 );
 
@@ -178,19 +174,17 @@ function App() {
   const nClk = useWire();
   return (
     <div className="App">
-      <header className="App-header">
-        <WiredClock
-          cout={clk}
-        />
-        <WiredInverter
-          input={clk}
-          output={nClk}
-        />
-        <WiredLightEmittingDiode
-          someOtherPropThatWillBeHandledLikeUsual
-          active={nClk}
-        />
-      </header>
+      <WiredClock
+        cout={clk}
+      />
+      <WiredInverter
+        input={clk}
+        output={nClk}
+      />
+      <WiredLightEmittingDiode
+        someOtherPropThatWillBeHandledLikeUsual
+        active={nClk}
+      />
     </div>
   );
 }
