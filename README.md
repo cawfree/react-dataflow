@@ -123,7 +123,7 @@ In this example, we render a `DigitalClock`, an [`Inverter`](https://en.wikipedi
 Notice that in order to render an `<Export />` component to manage the propagation of your component output props along a connected wire, you are **required** to specify an `exportPropTypes` attribute. This enables `react-dataflow` to efficiently manage, and validate, signal propagation using wires:
 
 ```javascript
-import React, { useState } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useRaf } from 'react-use';
 
@@ -165,13 +165,28 @@ const LightEmittingDiode = ({ style, active }) => (
   />
 );
 
-const WiredClock = withWires(Clock);
+// XXX: Components withWires can optionally specify an optional
+//      "key" prop, which aids in programmatically interpreting
+//      the resultant dataflow diagram.
+const WiredClock = withWires(Clock, { key: 'Master Clock' });
 const WiredInverter = withWires(Inverter);
 const WiredLightEmittingDiode = withWires(LightEmittingDiode);
 
-function App() {
+// XXX: Components wrapped withDataflow are passed a "subscribe" prop,
+//      which is used to listen to changes in the dataflow diagram state.
+function App({ subscribe }) {
   const clk = useWire();
   const nClk = useWire();
+  // XXX: Register to listen to signals *after* the initial layout, 
+  //      as the digram requires an initial render pass before any
+  //      wiring or value propagation can be properly determined.
+  useLayoutEffect(
+    () => {
+      subscribe(
+        signals => console.log(JSON.stringify(signals)),
+      );
+    },
+  );
   return (
     <div className="App">
       <WiredClock

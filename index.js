@@ -1,12 +1,15 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Map } from 'immutable';
 import { isEqual } from 'lodash';
+import EventEmitter from 'events';
 import uuidv4 from 'uuid/v4';
+
+const EVENT_SIGNALS_CHANGED = 'dataflowSignalsChanged';
 
 const Signals = React.createContext(null);
 const SignalsMutator = React.createContext(null);
 
-const Dataflow = ({ children, ...extraProps }) => {
+const Dataflow = ({ children: Component, ...extraProps }) => {
   const signalsMutator = useContext(SignalsMutator);
   useEffect(
     () => {
@@ -30,6 +33,22 @@ const Dataflow = ({ children, ...extraProps }) => {
       return v;
     },
   );
+  const [ Emitter ] = useState(
+    () => new EventEmitter(),
+  );
+  // XXX: Allow the parent to listen to changes in signals.
+  const [ subscribe ] = useState(
+    () => fn => Emitter.on(EVENT_SIGNALS_CHANGED, fn),
+  );
+  const [ children ] = useState(
+    () => (
+      <Component
+        {...extraProps}
+        subscribe={subscribe}
+      />
+    ),
+  ); 
+  Emitter.emit(EVENT_SIGNALS_CHANGED, arr[0]);
   return (
     <SignalsMutator.Provider
       value={mutateSignals}
@@ -44,7 +63,8 @@ const Dataflow = ({ children, ...extraProps }) => {
 
 export const withDataflow = Component => ({ ...extraProps }) => (
   <Dataflow
-    children={<Component {...extraProps} />}
+    {...extraProps}
+    children={Component}
   />
 );
 
