@@ -104,7 +104,7 @@ const Exporter = ({ outputWires, children, dataflowId, ...extraProps }) => {
       .reduce(
         (map, [k, v]) => map
           .setIn([outputWires[k], 'value'], v)
-          .setIn([outputWires[k], 'writers', dataflowId], true),
+          .setIn([outputWires[k], 'writers', dataflowId], k),
         signals,
       ),
   );
@@ -130,7 +130,7 @@ const WiredComponent = ({ Component, Export, outputKeys, dataflowId, ...extraPro
                 // XXX: Mark this element as a consumer.
                 mutateSignals(
                   signals => signals
-                    .setIn([v, 'readers', dataflowId], true),
+                    .setIn([v, 'readers', dataflowId], k),
                 );
                 return {
                   ...obj,
