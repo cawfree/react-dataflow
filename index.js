@@ -9,7 +9,7 @@ const EVENT_SIGNALS_CHANGED = 'dataflowSignalsChanged';
 const Signals = React.createContext(null);
 const SignalsMutator = React.createContext(null);
 
-const Dataflow = ({ children: Component, ...extraProps }) => {
+const Dataflow = ({ Component, ...extraProps }) => {
   const signalsMutator = useContext(SignalsMutator);
   useEffect(
     () => {
@@ -63,8 +63,8 @@ const Dataflow = ({ children: Component, ...extraProps }) => {
 
 export const withDataflow = Component => ({ ...extraProps }) => (
   <Dataflow
+    Component={Component}
     {...extraProps}
-    children={Component}
   />
 );
 
