@@ -26,6 +26,10 @@ const Dataflow = ({ Component, ...extraProps }) => {
   );
   const [ mutateSignals ] = useState(
     () => (fn) => {
+      if (fn === undefined) {
+        // XXX: Allows the state to be returned.
+        return arr[0];
+      }
       const v = fn(arr[0]);
       if (!isEqual(v, arr[0])) {
         setArr([arr[0] = v]);
@@ -70,6 +74,11 @@ export const withDataflow = Component => ({ ...extraProps }) => (
 
 const useSignals = () => useContext(Signals);
 const useSignalsMutator = () => useContext(SignalsMutator);
+
+// XXX: This is a convenience method, which permits callers to
+//      passively inspect wire states *without* registering 
+//      for updates.
+export const getWires = () => useSignalsMutator()();
 
 export const useWire = () => {
   const mutateSignals = useSignalsMutator();
