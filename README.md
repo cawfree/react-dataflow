@@ -207,5 +207,21 @@ function App({ subscribe }) {
 export default withDataflow(App);
 ```
 
+## 🔂 Iteration
+
+It is also possible to iterate across `react-dataflow` diagrams. Iterators effectively _suggest_ the most sensible sequence of nodes and wires to step through the diagram:
+
+```javascript
+import { Sequences } from 'react-dataflow';
+
+console.log(
+  // Signals and Elements can be determined via the subscribe callback.
+  new Sequences.Classical(
+    signals,
+    elements,
+  ),
+); // Returns an array of consecutive phases of linear execution.
+```
+
 ## ✌️ License
 [MIT](https://opensource.org/licenses/MIT)
