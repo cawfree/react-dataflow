@@ -45,6 +45,7 @@
   "dependencies": {
     "events": "^3.0.0",
     "immutable": "^4.0.0-rc.12",
+    "react-use-mutator": "^0.0.1",
     "uuid": "^3.3.3"
   }
 }
