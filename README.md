@@ -209,7 +209,7 @@ export default withDataflow(App);
 
 ## 🔂 Iteration
 
-It is also possible to iterate across `react-dataflow` diagrams. Iterators effectively _suggest_ the most sensible sequence of nodes and wires to step through the diagram:
+It is also possible to iterate across `react-dataflow` diagrams. Iterators effectively _suggest_ a most sensible sequence of elements and wires to step through in order to satisfy the rules of dataflow. For example, the `Classical` sequence type defines a sequence of phased execution which follows the rule that an element on the diagram cannot be executed until all of it's inputs have been satisfied.
 
 ```javascript
 import { Sequences } from 'react-dataflow';
