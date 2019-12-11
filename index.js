@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Map } from 'immutable';
+import { Map, Set } from 'immutable';
 import { isEqual } from 'lodash';
 import EventEmitter from 'events';
 import uuidv4 from 'uuid/v4';
@@ -92,8 +92,8 @@ export const useWire = () => {
             Map(
               {
                 value: null,
-                writers: Map({}),
-                readers: Map({}),
+                signalIn: Map({}),
+                signalOut: Map({}),
               },
             ),
           ),
@@ -113,7 +113,11 @@ const Exporter = ({ outputWires, children, dataflowId, ...extraProps }) => {
       .reduce(
         (map, [k, v]) => map
           .setIn([outputWires[k], 'value'], v)
-          .setIn([outputWires[k], 'writers', dataflowId], k),
+          .setIn(
+            [outputWires[k], 'signalIn', dataflowId],
+            (map.get([outputWires[k], 'signalIn', dataflowId]) || (Set([])))
+              .add(k),
+          ),
         signals,
       ),
   );
@@ -139,7 +143,11 @@ const WiredComponent = ({ Component, Export, outputKeys, dataflowId, ...extraPro
                 // XXX: Mark this element as a consumer.
                 mutateSignals(
                   signals => signals
-                    .setIn([v, 'readers', dataflowId], k),
+                    .setIn(
+                      [v, 'signalOut', dataflowId],
+                      (signals.get([v, 'signalOut', dataflowId]) || Set([]))
+                        .add(k),
+                    ),
                 );
                 return {
                   ...obj,
