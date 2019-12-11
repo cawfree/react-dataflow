@@ -4,7 +4,7 @@
   "description": "A dataflow execution format for React.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "./node_modules/.bin/babel ./index.js --out-file ./dist/index.js",
+    "build": "./node_modules/.bin/babel ./lib --out-dir ./dist",
     "test": "jest"
   },
   "keywords": [
