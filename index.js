@@ -1,6 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Map, Set } from 'immutable';
-import { isEqual } from 'lodash';
 import EventEmitter from 'events';
 import uuidv4 from 'uuid/v4';
 import { useMutator } from 'react-use-mutator';
@@ -180,7 +179,7 @@ export const withWires = (Component, options = {}) => (props) => {
   );
   const mutateElements = useElementsMutator();
   // XXX: Register this dataflowId as an element on the graph.
-  useEffect(() => mutateElements(elements => elements.add(dataflowId)) && undefined, []); 
+  useEffect(() => mutateElements(elements => elements.add(dataflowId)) && undefined, [ mutateElements, dataflowId]); 
   const { exportPropTypes, exportDefaultProps } = Component;
   const [ outputKeys ] = useState(
     () => {
