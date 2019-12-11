@@ -3,11 +3,14 @@ import { Map, Set } from 'immutable';
 import { isEqual } from 'lodash';
 import EventEmitter from 'events';
 import uuidv4 from 'uuid/v4';
+import { useMutator } from 'react-use-mutator';
 
 const EVENT_SIGNALS_CHANGED = 'dataflowSignalsChanged';
 
 const Signals = React.createContext(null);
 const SignalsMutator = React.createContext(null);
+const Elements = React.createContext(null);
+const ElementsMutator = React.createContext(null);
 
 const Dataflow = ({ Component, ...extraProps }) => {
   const signalsMutator = useContext(SignalsMutator);
@@ -21,22 +24,8 @@ const Dataflow = ({ Component, ...extraProps }) => {
     },
     [signalsMutator],
   );
-  const [ arr, setArr ] = useState(
-    () => [Map({})],
-  );
-  const [ mutateSignals ] = useState(
-    () => (fn) => {
-      if (fn === undefined) {
-        // XXX: Allows the state to be returned.
-        return arr[0];
-      }
-      const v = fn(arr[0]);
-      if (!isEqual(v, arr[0])) {
-        setArr([arr[0] = v]);
-      }
-      return v;
-    },
-  );
+  const [ useSignals, mutateSignals ] = useMutator(Map({}));
+  const [ useElements, mutateElements ] = useMutator(Set([]));
   const [ Emitter ] = useState(
     () => new EventEmitter(),
   );
@@ -52,16 +41,24 @@ const Dataflow = ({ Component, ...extraProps }) => {
       />
     ),
   ); 
-  Emitter.emit(EVENT_SIGNALS_CHANGED, arr[0]);
+  Emitter.emit(EVENT_SIGNALS_CHANGED, useSignals(), useElements());
   return (
-    <SignalsMutator.Provider
-      value={mutateSignals}
+    <ElementsMutator.Provider
+      value={mutateElements}
     >
-      <Signals.Provider
-        value={arr}
-        children={children}
-      />
-    </SignalsMutator.Provider>
+      <SignalsMutator.Provider
+        value={mutateSignals}
+      >
+        <Elements.Provider
+          value={useElements}
+        >
+          <Signals.Provider
+            value={useSignals}
+            children={children}
+          />
+        </Elements.Provider>
+      </SignalsMutator.Provider>
+    </ElementsMutator.Provider>
   );
 };
 
@@ -74,6 +71,7 @@ export const withDataflow = Component => ({ ...extraProps }) => (
 
 const useSignals = () => useContext(Signals);
 const useSignalsMutator = () => useContext(SignalsMutator);
+const useElementsMutator = () => useContext(ElementsMutator);
 
 // XXX: This is a convenience method, which permits callers to
 //      passively inspect wire states *without* registering 
@@ -129,7 +127,7 @@ const Exporter = ({ outputWires, children, dataflowId, ...extraProps }) => {
 };
 
 const WiredComponent = ({ Component, Export, outputKeys, dataflowId, ...extraProps }) => {
-  const signals = useSignals();
+  const getState = useSignals();
   const mutateSignals = useSignalsMutator();
   const [ Wired ] = useState(
     () => ({ ...extraProps }) => (
@@ -139,7 +137,7 @@ const WiredComponent = ({ Component, Export, outputKeys, dataflowId, ...extraPro
           .filter(([k]) => outputKeys.indexOf(k) < 0)
           .reduce(
             (obj, [k, v]) => {
-              if (signals[0].has(v)) {
+              if (getState().has(v)) {
                 // XXX: Mark this element as a consumer.
                 mutateSignals(
                   signals => signals
@@ -151,7 +149,7 @@ const WiredComponent = ({ Component, Export, outputKeys, dataflowId, ...extraPro
                 );
                 return {
                   ...obj,
-                  [k]: signals[0]
+                  [k]: getState()
                     .getIn([v, 'value']),
                 };
               }
@@ -180,6 +178,9 @@ export const withWires = (Component, options = {}) => (props) => {
     // TODO: Validate that the supplied key is an appropriate unique type.
     () => options.key || uuidv4(),
   );
+  const mutateElements = useElementsMutator();
+  // XXX: Register this dataflowId as an element on the graph.
+  useEffect(() => mutateElements(elements => elements.add(dataflowId)) && undefined, []); 
   const { exportPropTypes, exportDefaultProps } = Component;
   const [ outputKeys ] = useState(
     () => {
