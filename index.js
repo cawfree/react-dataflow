@@ -78,7 +78,7 @@ const useSignalsMutator = () => useContext(SignalsMutator);
 // XXX: This is a convenience method, which permits callers to
 //      passively inspect wire states *without* registering 
 //      for updates.
-export const getWires = () => useSignalsMutator()();
+export const useWires = () => useSignalsMutator()();
 
 export const useWire = () => {
   const mutateSignals = useSignalsMutator();
