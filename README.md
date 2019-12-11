@@ -183,7 +183,7 @@ function App({ subscribe }) {
   useLayoutEffect(
     () => {
       subscribe(
-        signals => console.log(JSON.stringify(signals)),
+        (signals, elements) => console.log(JSON.stringify(signals), JSON.stringify(elements)),
       );
     },
   );
